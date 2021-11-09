@@ -3,6 +3,8 @@ const $$ = document.querySelectorAll.bind(document);
 
 const slider = {
     wrappers: [],
+    sliderMains: [],
+    sliderSubs: [],
     sliderRows: [],
     sliderLists: [],
     sliderItems: [],
@@ -13,36 +15,54 @@ const slider = {
     sliderGap: [],
     currentPosition: [],
     currentItem: [],
-    switchImage(index, direction) {
-        if (direction === 'next') {
-            if (this.currentItem[index] < this.sliderLength[index] - this.sliderCol[index]) {
-                this.sliderPreviouss[index].classList.remove('disabled');
-                this.currentItem[index]++;
-                if (this.currentItem[index] == this.sliderLength[index] - this.sliderCol[index]) {
-                    this.sliderNexts[index].classList.add('disabled');
-                }
-            }
-        } else {
-            if(this.currentItem[index] !== 0) {
-                this.sliderNexts[index].classList.remove('disabled');
-                this.currentItem[index]--;
-                if (this.currentItem[index] === 0) {
-                    this.sliderPreviouss[index].classList.add('disabled');
-                }
+    setDataIndex() {
+        this.wrappers.forEach((wrapper, index) => {
+            wrapper.dataset.index = index;
+        })
+        this.sliderItems.forEach(sliderItem => {
+            sliderItem.forEach((item, index) => {
+                item.dataset.index = index;
+            })
+        })
+    },
+    switchImage(index) {
+        if (this.currentItem[index] >= this.sliderLength[index] - this.sliderCol[index] || this.currentItem[index] <= 0) {
+            if (this.currentItem[index] >= this.sliderLength[index] -this.sliderCol[index]) {
+                this.currentItem[index] = this.sliderLength[index] - this.sliderCol[index];
+                this.sliderNexts[index].classList.add('disabled');
+            } else {
+                this.currentItem[index] = 0;
+                this.sliderPreviouss[index].classList.add('disabled');
             }
         }
-        this.currentPosition[index] = `calc((100% / ${this.sliderCol[index]})*${this.currentItem[index]}*(-1))`;
+        else {
+            this.sliderPreviouss[index].classList.remove('disabled');
+            this.sliderNexts[index].classList.remove('disabled');
+        }
+        this.currentPosition[index] = `calc(((100% / ${this.sliderCol[index]}) + (${this.sliderGap[index]} / ${this.sliderCol[index]}))*${this.currentItem[index]}*(-1))`;
         this.sliderLists[index].style.left = `${this.currentPosition[index]}`;
     },
     handleEvents() {
         this.sliderNexts.forEach((sliderNext, index) => {
             sliderNext.onclick = () => {
-                this.switchImage(index, 'next');
+                this.currentItem[index]++;
+                this.switchImage(index);
             }
         })
         this.sliderPreviouss.forEach((sliderPrevious, index) => {
             sliderPrevious.onclick = () => {
-                this.switchImage(index, 'previous');
+                this.currentItem[index]--;
+                this.switchImage(index);
+            }
+        })
+        this.sliderSubs.forEach(sliderSub => {
+            sliderSub.onclick = (e) => {
+                const sliderMainIndex = sliderSub.dataset.index - 1;
+                const selectedItem = e.target.closest('.slider-item');
+                if (selectedItem) {
+                    this.currentItem[sliderMainIndex] = selectedItem.dataset.index;
+                    this.switchImage(sliderMainIndex);
+                }
             }
         })
     },
@@ -61,6 +81,8 @@ const slider = {
             `
             wrapper.innerHTML += htmls;
         })
+        this.sliderMains = Array.from($$('.slider.slider-main'));
+        this.sliderSubs = Array.from($$('.slider.slider-sub'));
         this.sliderRows = Array.from($$('.slider-row'));
         this.sliderLists = Array.from($$('.slider-list'));
         this.sliderNexts = Array.from($$('.slider-next'));
@@ -70,7 +92,7 @@ const slider = {
             this.sliderItems = [...this.sliderItems, currentSliderItems];
             this.sliderLength[index] = currentSliderItems.length;
             this.sliderCol[index] = Number(sliderList.dataset.col) || 6;
-            this.sliderGap[index] = sliderList.dataset.gap || '10px';
+            this.sliderGap[index] = sliderList.dataset.gap || '0px';
             this.currentPosition[index] = '0';
             this.currentItem[index] = 0;
             sliderList.style.marginLeft = `-${this.sliderGap[index]}`;
@@ -79,6 +101,7 @@ const slider = {
                 currentSliderItem.style.marginLeft = `${this.sliderGap[index]}`;
             })
         })
+        this.setDataIndex();
         this.handleEvents();
     }
 }
