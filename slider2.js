@@ -17,11 +17,11 @@ const slider = {
     currentItem: [],
     setDataIndex() {
         this.wrappers.forEach((wrapper, index) => {
-            wrapper.dataset.index = index;
+            wrapper.dataset.sliderIndex = index;
         })
         this.sliderItems.forEach(sliderItem => {
             sliderItem.forEach((item, index) => {
-                item.dataset.index = index;
+                item.dataset.itemIndex = index;
             })
         })
     },
@@ -57,10 +57,10 @@ const slider = {
         })
         this.sliderSubs.forEach(sliderSub => {
             sliderSub.onclick = (e) => {
-                const sliderMainIndex = sliderSub.dataset.index - 1;
+                const sliderMainIndex = sliderSub.dataset.sliderIndex - 1;
                 const selectedItem = e.target.closest('.slider-item');
                 if (selectedItem) {
-                    this.currentItem[sliderMainIndex] = selectedItem.dataset.index;
+                    this.currentItem[sliderMainIndex] = selectedItem.dataset.itemIndex;
                     this.switchImage(sliderMainIndex);
                 }
             }
@@ -91,7 +91,7 @@ const slider = {
             const currentSliderItems = Array.from(sliderList.querySelectorAll('.slider-item'));
             this.sliderItems = [...this.sliderItems, currentSliderItems];
             this.sliderLength[index] = currentSliderItems.length;
-            this.sliderCol[index] = Number(sliderList.dataset.col) || 6;
+            this.sliderCol[index] = Number(sliderList.dataset.col) || 1;
             this.sliderGap[index] = sliderList.dataset.gap || '0px';
             this.currentPosition[index] = '0';
             this.currentItem[index] = 0;
