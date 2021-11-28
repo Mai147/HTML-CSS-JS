@@ -43,18 +43,27 @@ const slider = {
         this.sliderLists[index].style.left = `${this.currentPosition[index]}`;
     },
     handleEvents() {
+        // next event
         this.sliderNexts.forEach((sliderNext, index) => {
             sliderNext.onclick = () => {
-                this.currentItem[index]++;
-                this.switchImage(index);
+                if (!sliderNext.classList.contains('disabled')) {
+                    this.currentItem[index]++;
+                    this.switchImage(index);
+                }
             }
         })
+
+        // previous event
         this.sliderPreviouss.forEach((sliderPrevious, index) => {
             sliderPrevious.onclick = () => {
-                this.currentItem[index]--;
-                this.switchImage(index);
+                if (!sliderPrevious.classList.contains('disabled')) {
+                    this.currentItem[index]--;
+                    this.switchImage(index);
+                }
             }
         })
+
+        // slider sub event
         this.sliderSubs.forEach(sliderSub => {
             sliderSub.onclick = (e) => {
                 const sliderMainIndex = sliderSub.dataset.sliderIndex - 1;
@@ -68,10 +77,12 @@ const slider = {
     },
     init() {
         this.wrappers = Array.from($$('.slider'));
+
+        // Create previous and next button 
         this.wrappers.forEach(wrapper => {
             const htmls = `
                 <div class="slider-control">
-                    <div class="slider-button slider-previous disabled">
+                    <div class="slider-button slider-previous">
                         <i class="fas fa-chevron-left"></i>
                     </div>
                     <div class="slider-button slider-next">
@@ -81,12 +92,16 @@ const slider = {
             `
             wrapper.innerHTML += htmls;
         })
+
+        // Get slider
         this.sliderMains = Array.from($$('.slider.slider-main'));
         this.sliderSubs = Array.from($$('.slider.slider-sub'));
         this.sliderRows = Array.from($$('.slider-row'));
         this.sliderLists = Array.from($$('.slider-list'));
         this.sliderNexts = Array.from($$('.slider-next'));
         this.sliderPreviouss = Array.from($$('.slider-previous'));
+
+        // Get items in slider list
         this.sliderLists.forEach((sliderList, index) => {
             const currentSliderItems = Array.from(sliderList.querySelectorAll('.slider-item'));
             this.sliderItems = [...this.sliderItems, currentSliderItems];
@@ -96,10 +111,19 @@ const slider = {
             this.currentPosition[index] = '0';
             this.currentItem[index] = 0;
             sliderList.style.marginLeft = `-${this.sliderGap[index]}`;
+
+            // Setup for slider item
             currentSliderItems.forEach(currentSliderItem => {
-                currentSliderItem.style.flex = `1 0 calc((100% / ${this.sliderCol[index]}) - ${this.sliderGap[index]})`;
+                currentSliderItem.style.flexBasis = `calc((100% / ${this.sliderCol[index]}) - ${this.sliderGap[index]})`;
+                currentSliderItem.style.flexShrink = `0`;
                 currentSliderItem.style.marginLeft = `${this.sliderGap[index]}`;
             })
+
+            // Set disabled for previous and next button
+            this.sliderPreviouss[index].classList.add('disabled');
+            if (this.sliderLength[index] <= this.sliderCol[index]) {
+                this.sliderNexts[index].classList.add('disabled');
+            }
         })
         this.setDataIndex();
         this.handleEvents();
